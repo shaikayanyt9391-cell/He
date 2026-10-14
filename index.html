@@ -1,0 +1,125 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<link rel="manifest" href="manifest.json"><meta name="theme-color" content="#2f5bea"><link rel="icon" href="icon-192.png"><title>Drape – themes and wallpapers</title>
+<style>
+:root{--bg:#f5f3ee;--surface:#fff;--ink:#1d2330;--mute:#6b7280;--line:#e3e0d8;--acc:#2f5bea;--accink:#fff;box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px);color-scheme:light}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){--bg:#12151c;--surface:#1b202b;--ink:#eef0f5;--mute:#98a0b0;--line:#2a3140;--acc:#7a98ff;--accink:#0d1220;color-scheme:dark}}
+:root[data-theme="dark"]{--bg:#12151c;--surface:#1b202b;--ink:#eef0f5;--mute:#98a0b0;--line:#2a3140;--acc:#7a98ff;--accink:#0d1220;color-scheme:dark}
+*{box-sizing:border-box}
+html,body{margin:0;background:var(--bg);color:var(--ink);font-family:"Trebuchet MS","Segoe UI",system-ui,sans-serif}
+body{max-width:640px;margin:0 auto;min-height:100vh;padding-bottom:84px}
+header{padding:20px 16px 8px}
+h1{font-family:Georgia,"Times New Roman",serif;font-size:30px;margin:0;letter-spacing:-.5px}
+.sub{color:var(--mute);margin:2px 0 12px;font-size:14px}
+.search{width:100%;padding:12px 14px;border-radius:12px;border:1px solid var(--line);background:var(--surface);color:var(--ink);font-size:16px}
+.chips{display:flex;gap:8px;overflow-x:auto;padding:12px 16px}
+.chip{flex:none;padding:8px 14px;border-radius:20px;border:1px solid var(--line);background:var(--surface);color:var(--ink);font-size:14px;cursor:pointer}
+.chip[aria-pressed="true"]{background:var(--acc);color:var(--accink);border-color:var(--acc)}
+.grid{display:grid;grid-template-columns:repeat(2,1fr);gap:12px;padding:4px 16px}
+.card{border:0;padding:0;background:none;text-align:left;color:var(--ink);cursor:pointer}
+.art{aspect-ratio:9/16;border-radius:16px;position:relative;overflow:hidden}
+.card .t{font-size:14px;margin:6px 2px 0;font-weight:600}
+.card .c{font-size:12px;color:var(--mute);margin:0 2px}
+.empty{padding:40px 16px;color:var(--mute);text-align:center}
+nav{position:fixed;left:0;right:0;bottom:0;display:flex;justify-content:center;background:var(--surface);border-top:1px solid var(--line);padding-bottom:env(safe-area-inset-bottom,0px)}
+nav div{display:flex;width:100%;max-width:640px}
+nav button{flex:1;padding:14px 4px;border:0;background:none;color:var(--mute);font-size:14px;cursor:pointer}
+nav button[aria-current="page"]{color:var(--acc);font-weight:700}
+.sheet{position:fixed;inset:0;background:rgba(0,0,0,.55);display:none;align-items:flex-end;justify-content:center;z-index:5}
+.sheet.on{display:flex}
+.panel{background:var(--surface);width:100%;max-width:640px;border-radius:20px 20px 0 0;padding:16px;max-height:92vh;overflow:auto}
+.panel h2{margin:0 0 4px;font-family:Georgia,serif}
+.prev{display:flex;gap:12px;margin:12px 0}
+.phone{width:46%;aspect-ratio:9/16;border-radius:18px;position:relative;overflow:hidden;border:3px solid var(--ink)}
+.phone i{position:absolute;border-radius:8px}
+.btn{display:block;width:100%;padding:14px;border-radius:12px;border:0;background:var(--acc);color:var(--accink);font-size:16px;font-weight:700;margin-top:8px;cursor:pointer}
+.btn.alt{background:none;color:var(--ink);border:1px solid var(--line)}
+.row{display:flex;justify-content:space-between;align-items:center;padding:14px 16px;border-bottom:1px solid var(--line)}
+.list{background:var(--surface);margin:8px 16px;border-radius:14px;border:1px solid var(--line)}
+.list .row:last-child{border:0}
+.note{font-size:13px;color:var(--mute);margin:6px 0}
+input[type=checkbox]{width:22px;height:22px;accent-color:var(--acc)}
+.saveimg{width:100%;border-radius:14px;margin-top:10px}
+button:focus-visible,input:focus-visible{outline:3px solid var(--acc);outline-offset:2px}
+</style>
+</head>
+<body>
+<header><h1>Drape</h1><p class="sub" id="sub">Fresh looks for your phone</p>
+<input class="search" id="q" type="search" placeholder="Search themes" aria-label="Search"></header>
+<div class="chips" id="chips"></div>
+<main id="main"></main>
+<nav><div id="nav">
+<button data-t="themes" aria-current="page">Themes</button>
+<button data-t="walls">Wallpapers</button>
+<button data-t="alerts">Alerts</button></div></nav>
+<div class="sheet" id="sheet"><div class="panel" id="panel"></div></div>
+<script>
+var CATS=["All","Minimal","Dark","Nature","Neon","Pastel"];
+var BASE=[
+["Paper Dawn","Minimal",["#f3ece0","#e8d5b7","#b9a07a"]],["Plain Slate","Minimal",["#dfe3ea","#aab4c4","#5c6b84"]],["Quiet Mint","Minimal",["#e6f2ec","#b8dcc9","#6aa88a"]],["Soft Ink","Minimal",["#eeeeee","#bdbdbd","#4a4a4a"]],
+["Midnight Oil","Dark",["#0b1020","#18233f","#3e5ca8"]],["Coal Ember","Dark",["#120a0a","#3a1612","#c4512f"]],["Deep Pine","Dark",["#07130f","#10392b","#2f9a72"]],["Void Violet","Dark",["#0d0818","#2a1450","#7a45d6"]],
+["Fern Valley","Nature",["#d7ecc2","#7fb867","#2f6b3a"]],["Sand Coast","Nature",["#f6e3b8","#e6b97a","#3e8aa6"]],["Alpine Mist","Nature",["#dbe8f0","#9fbad0","#4b6c8c"]],["Autumn Trail","Nature",["#f4d9a0","#d9803a","#7a3a1c"]],
+["Laser Grid","Neon",["#0a0618","#ff2e93","#22e6ff"]],["Acid Rain","Neon",["#06140d","#9dff3c","#00c2a8"]],["Hot Wire","Neon",["#13060a","#ff5a1f","#ffd23f"]],["Ultra Pulse","Neon",["#080a22","#5a5bff","#ff4de0"]],
+["Cotton Sky","Pastel",["#fde2ec","#d9e6ff","#fff3c9"]],["Lilac Milk","Pastel",["#efe3ff","#d3c2f7","#ffe0f0"]],["Peach Tea","Pastel",["#ffe6d5","#ffcfb0","#fff1de"]],["Seafoam","Pastel",["#d8f5ec","#bfe3f5","#f0fbe2"]]
+];
+var ANG=[160,200,135,225,180];
+var items=BASE.map(function(b,i){return{id:i,name:b[0],cat:b[1],c:b[2],a:ANG[i%5]}});
+function grad(it){return"linear-gradient("+it.a+"deg,"+it.c[0]+","+it.c[1]+" 55%,"+it.c[2]+")"}
+function isDark(h){var n=parseInt(h.slice(1),16),r=n>>16,g=n>>8&255,b=n&255;return(r*299+g*587+b*114)/1000<128}
+var st={tab:"themes",cat:"All",q:"",alerts:{newThemes:true,sales:false}};
+try{var s=localStorage.getItem("drape");if(s)st.alerts=JSON.parse(s)}catch(e){}
+function save(){try{localStorage.setItem("drape",JSON.stringify(st.alerts))}catch(e){}}
+function art(it,wall){
+ var ink=isDark(it.c[0])?"#ffffffcc":"#1d2330cc";
+ var extra=wall?"":'<span style="position:absolute;top:14%;left:0;right:0;text-align:center;font:700 22px Georgia,serif;color:'+ink+'">9:41</span>'+
+ '<i style="left:12%;right:12%;bottom:10%;height:8%;background:'+ink.slice(0,7)+'22"></i>';
+ return'<div class="art" style="background:'+grad(it)+'">'+extra+'</div>'}
+function render(){
+ var m=document.getElementById("main"),ch=document.getElementById("chips"),q=document.querySelector(".search");
+ document.querySelectorAll("nav button").forEach(function(b){b.removeAttribute("aria-current");if(b.dataset.t===st.tab)b.setAttribute("aria-current","page")});
+ if(st.tab==="alerts"){ch.style.display="none";q.style.display="none";document.getElementById("sub").textContent="Choose what you hear about";
+  m.innerHTML='<div class="list"><label class="row"><span>New themes<br><span class="note">When a new pack is added</span></span><input type="checkbox" id="a1" '+(st.alerts.newThemes?"checked":"")+'></label>'+
+  '<label class="row"><span>Sales and offers<br><span class="note">Off by default</span></span><input type="checkbox" id="a2" '+(st.alerts.sales?"checked":"")+'></label></div>'+
+  '<p class="note" style="margin:8px 20px">Alerts are saved on this device only.</p>';
+  document.getElementById("a1").onchange=function(e){st.alerts.newThemes=e.target.checked;save()};
+  document.getElementById("a2").onchange=function(e){st.alerts.sales=e.target.checked;save()};return}
+ ch.style.display="";q.style.display="";
+ document.getElementById("sub").textContent=st.tab==="themes"?"Fresh looks for your phone":"Full-screen backgrounds";
+ q.placeholder=st.tab==="themes"?"Search themes":"Search wallpapers";
+ ch.innerHTML=CATS.map(function(c){return'<button class="chip" aria-pressed="'+(c===st.cat)+'" data-c="'+c+'">'+c+'</button>'}).join("");
+ ch.querySelectorAll(".chip").forEach(function(b){b.onclick=function(){st.cat=b.dataset.c;render()}});
+ var list=items.filter(function(i){return(st.cat==="All"||i.cat===st.cat)&&i.name.toLowerCase().indexOf(st.q.toLowerCase())>-1});
+ if(!list.length){m.innerHTML='<p class="empty">Nothing matches "'+st.q.replace(/[<>&"]/g,"")+'". Try another word or pick All.</p>';return}
+ m.innerHTML='<div class="grid">'+list.map(function(i){return'<button class="card" data-i="'+i.id+'">'+art(i,st.tab==="walls")+'<p class="t">'+i.name+'</p><p class="c">'+i.cat+'</p></button>'}).join("")+'</div>';
+ m.querySelectorAll(".card").forEach(function(b){b.onclick=function(){open(items[+b.dataset.i])}});
+}
+function open(it){
+ var p=document.getElementById("panel"),w=st.tab==="walls";
+ var phone='<div class="phone" style="background:'+grad(it)+'">'+(w?"":'<i style="top:12%;left:14%;width:72%;height:10%;background:#ffffff55"></i><i style="top:30%;left:14%;width:20%;height:9%;background:#ffffff66"></i><i style="top:30%;left:40%;width:20%;height:9%;background:#ffffff66"></i><i style="top:30%;left:66%;width:20%;height:9%;background:#ffffff66"></i><i style="bottom:6%;left:10%;width:80%;height:10%;background:#00000033"></i>')+'</div>';
+ p.innerHTML='<h2>'+it.name+'</h2><p class="note">'+it.cat+(w?" wallpaper":" theme")+'</p><div class="prev">'+phone+'<div style="flex:1"><p class="note">Colors</p>'+it.c.map(function(c){return'<div style="display:flex;align-items:center;gap:8px;margin:6px 0"><span style="width:26px;height:26px;border-radius:8px;background:'+c+';border:1px solid var(--line)"></span>'+c+'</div>'}).join("")+'</div></div>'+
+ '<button class="btn" id="go">'+(w?"Get wallpaper":"Get theme")+'</button><button class="btn alt" id="x">Close</button><div id="out"></div>';
+ document.getElementById("sheet").classList.add("on");
+ document.getElementById("x").onclick=close;
+ document.getElementById("go").onclick=function(){make(it,w)};
+}
+function make(it,w){
+ var c=document.createElement("canvas");c.width=720;c.height=1600;var x=c.getContext("2d");
+ var a=it.a*Math.PI/180,dx=Math.sin(a),dy=-Math.cos(a),L=c.width*Math.abs(dx)+c.height*Math.abs(dy),cx=360,cy=800;
+ var g=x.createLinearGradient(cx-dx*L/2,cy-dy*L/2,cx+dx*L/2,cy+dy*L/2);g.addColorStop(0,it.c[0]);g.addColorStop(.55,it.c[1]);g.addColorStop(1,it.c[2]);
+ x.fillStyle=g;x.fillRect(0,0,720,1600);
+ var o=document.getElementById("out"),img="";
+ try{img='<img class="saveimg" alt="'+it.name+' wallpaper" src="'+c.toDataURL("image/png")+'">'}catch(e){}
+ o.innerHTML=(img||'<p class="note">Could not draw the image.</p>')+'<p class="note">Press and hold the image, then choose Save or Set as wallpaper.'+(w?"":" Themes use these colors for icons and backgrounds. Icon packs are not included in this version.")+'</p>';
+}
+function close(){document.getElementById("sheet").classList.remove("on")}
+document.getElementById("sheet").onclick=function(e){if(e.target.id==="sheet")close()};
+document.getElementById("q").oninput=function(e){st.q=e.target.value;render()};
+document.querySelectorAll("nav button").forEach(function(b){b.onclick=function(){st.tab=b.dataset.t;st.q="";document.getElementById("q").value="";render()}});
+render();
+if("serviceWorker" in navigator){navigator.serviceWorker.register("sw.js").catch(function(){})}
+</script>
+</body>
+</html>
